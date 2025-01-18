@@ -1,1 +1,1 @@
-This is my repository for CS361.
+This is my repository for CS361. And this is the readme file.
