@@ -128,6 +128,9 @@ so you don't have to.</string>
              <property name="text">
               <string notr="true">tips text</string>
              </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -327,7 +330,7 @@ Home</string>
             <number>0</number>
            </property>
            <item>
-            <widget class="QPushButton" name="btn_add_game">
+            <widget class="QPushButton" name="btn_LibraryAddGame">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -364,7 +367,20 @@ Home</string>
             </spacer>
            </item>
            <item>
-            <widget class="QComboBox" name="dd_sort_by">
+            <widget class="QLabel" name="lbl_LibrarySortBy">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Sort by:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="dd_LibrarySortBy">
              <property name="font">
               <font>
                <pointsize>14</pointsize>
@@ -375,6 +391,9 @@ Home</string>
               <string notr="true">QComboBox {
 	padding: 10px;
 }</string>
+             </property>
+             <property name="currentText">
+              <string>Name</string>
              </property>
              <property name="sizeAdjustPolicy">
               <enum>QComboBox::SizeAdjustPolicy::AdjustToContents</enum>
@@ -424,8 +443,8 @@ Home</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>620</width>
-                <height>326</height>
+                <width>80</width>
+                <height>18</height>
                </rect>
               </property>
               <layout class="QGridLayout" name="grid_games"/>
@@ -468,8 +487,15 @@ Home</string>
                <height>72</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
-              <string>PushButton</string>
+              <string notr="true">🏠
+Home</string>
              </property>
             </widget>
            </item>
@@ -482,7 +508,7 @@ Home</string>
               </font>
              </property>
              <property name="text">
-              <string>Game Name</string>
+              <string notr="true">Game Name</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -548,17 +574,32 @@ Home</string>
                 <widget class="QLabel" name="lbl_ViewDescription">
                  <property name="font">
                   <font>
-                   <pointsize>18</pointsize>
+                   <pointsize>14</pointsize>
                    <bold>true</bold>
                   </font>
                  </property>
                  <property name="text">
-                  <string>TextLabel</string>
+                  <string notr="true">Genre: [genre]
+Year: [year]
+
+Description Text</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                 </property>
+                 <property name="wordWrap">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="lbl_ViewGameArt">
+                <widget class="QWidget" name="widget_11" native="true">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>200</width>
@@ -571,15 +612,40 @@ Home</string>
                    <height>16777215</height>
                   </size>
                  </property>
-                 <property name="text">
-                  <string/>
-                 </property>
-                 <property name="pixmap">
-                  <pixmap resource="images/GameArt.qrc">:/GameArt/placeholder.png</pixmap>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
-                 </property>
+                 <widget class="QLabel" name="lbl_ViewGameArt">
+                  <property name="geometry">
+                   <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>200</width>
+                    <height>300</height>
+                   </rect>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>200</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="pixmap">
+                   <pixmap resource="GameArt.qrc">:/GameArt/placeholder.png</pixmap>
+                  </property>
+                  <property name="scaledContents">
+                   <bool>true</bool>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+                  </property>
+                 </widget>
                 </widget>
                </item>
               </layout>
@@ -649,7 +715,7 @@ Home</string>
               </font>
              </property>
              <property name="text">
-              <string>Add Game</string>
+              <string notr="true">Add Game</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -682,7 +748,7 @@ Home</string>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="txt_AddInstructions">
           <property name="font">
            <font>
             <pointsize>12</pointsize>
@@ -690,7 +756,7 @@ Home</string>
            </font>
           </property>
           <property name="text">
-           <string>Fill in all the details about the game. Either browse your files for art, or drag &amp; drop a file onto the placeholder image. If you don't have game art saved to your computer, don't worry; a placeholder image will be used instead. When done, click the Add Game button.</string>
+           <string notr="true">Fill in all the details about the game. Either browse your files for art, or drag &amp; drop a file onto the placeholder image. If you don't have game art saved to your computer, don't worry; a placeholder image will be used instead. When done, click the Add Game button.</string>
           </property>
           <property name="textFormat">
            <enum>Qt::TextFormat::PlainText</enum>
@@ -711,12 +777,12 @@ Home</string>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <widget class="QComboBox" name="comboBox">
+          <widget class="QComboBox" name="dd_AddYear">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>50</y>
-             <width>81</width>
+             <width>88</width>
              <height>34</height>
             </rect>
            </property>
@@ -732,6 +798,11 @@ Home</string>
            <property name="placeholderText">
             <string>Year</string>
            </property>
+           <item>
+            <property name="text">
+             <string>-Year-</string>
+            </property>
+           </item>
            <item>
             <property name="text">
              <string>1980</string>
@@ -963,7 +1034,7 @@ Home</string>
             </property>
            </item>
           </widget>
-          <widget class="QComboBox" name="comboBox_2">
+          <widget class="QComboBox" name="dd_AddGenre">
            <property name="geometry">
             <rect>
              <x>131</x>
@@ -993,6 +1064,11 @@ Home</string>
            <property name="placeholderText">
             <string>Genre</string>
            </property>
+           <item>
+            <property name="text">
+             <string>-Genre-</string>
+            </property>
+           </item>
            <item>
             <property name="text">
              <string>Adventure</string>
@@ -1099,7 +1175,7 @@ Home</string>
             </property>
            </item>
           </widget>
-          <widget class="QLineEdit" name="lineEdit">
+          <widget class="QLineEdit" name="txt_AddName">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -1123,7 +1199,7 @@ Home</string>
             <string>Game Name</string>
            </property>
           </widget>
-          <widget class="QPlainTextEdit" name="plainTextEdit">
+          <widget class="QPlainTextEdit" name="txt_AddDescription">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -1141,10 +1217,10 @@ Home</string>
             <string>Game Description</string>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="btn_AddGameSubmit">
            <property name="geometry">
             <rect>
-             <x>390</x>
+             <x>395</x>
              <y>230</y>
              <width>191</width>
              <height>40</height>
@@ -1157,10 +1233,10 @@ Home</string>
             </font>
            </property>
            <property name="text">
-            <string>➕ Add Game</string>
+            <string notr="true">➕ Add Game</string>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="btn_AddChooseArt">
            <property name="geometry">
             <rect>
              <x>360</x>
@@ -1176,10 +1252,10 @@ Home</string>
             </font>
            </property>
            <property name="text">
-            <string>Browse for game art... 📂</string>
+            <string notr="true">Browse for game art... 📂</string>
            </property>
           </widget>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="lbl_AddGameArt">
            <property name="geometry">
             <rect>
              <x>431</x>
@@ -1200,11 +1276,14 @@ Home</string>
              <height>180</height>
             </size>
            </property>
+           <property name="acceptDrops">
+            <bool>true</bool>
+           </property>
            <property name="text">
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="images/GameArt.qrc">:/GameArt/placeholder.png</pixmap>
+            <pixmap resource="GameArt.qrc">:/GameArt/placeholder.png</pixmap>
            </property>
            <property name="scaledContents">
             <bool>true</bool>
@@ -1220,7 +1299,7 @@ Home</string>
   </widget>
  </widget>
  <resources>
-  <include location="images/GameArt.qrc"/>
+  <include location="GameArt.qrc"/>
  </resources>
  <connections/>
 </ui>
