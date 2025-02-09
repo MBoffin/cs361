@@ -11,31 +11,32 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.setupUi(self)
         self.populate_tips()
 
+        # App page constants
         self.BEGIN_PAGE = 0
         self.LIBRARY_PAGE = 1
         self.VIEW_PAGE = 2
         self.ADD_PAGE = 3
 
+        # Home button signals
         self.btn_begin.clicked.connect(self.go_home)
         self.btn_ViewHome.clicked.connect(self.go_home)
         self.btn_AddHome.clicked.connect(self.go_home)
         self.btn_LibraryHome.clicked.connect(self.go_home)
 
+        # Sort by signal
         self.dd_LibrarySortBy.currentIndexChanged.connect(self.populate_library_list)
 
-        self.btn_LibraryAddGame.clicked.connect(self.go_add_game)
+        # Add Game page setup
+        self.btn_LibraryAddGame.clicked.connect(self.navigate_to_add_game)
         self.btn_AddGameSubmit.clicked.connect(self.add_new_game)
         self.btn_AddChooseArt.clicked.connect(self.add_game_choose_art)
         self.lbl_AddGameArt.dragEnterEvent = self.art_drag_enter_event
         self.lbl_AddGameArt.dropEvent = self.art_drop_event
-        
-        self.pnl_pages.currentChanged.connect(self.page_changed)
-
         self.add_game_art_changed = False
-
+        
         self.show()
 
-    # TODO: Replace with microservice
+    # TODO: Replace with Naveed's microservice
     def populate_tips(self):
         query = "SELECT text FROM tips"
         db_tips = cursor.execute(query).fetchall()
@@ -48,6 +49,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.lbl_tips.setText(tip_text)
 
     def go_home(self):
+        # Ensure they don't lost data on Add Page
         if self.pnl_pages.currentIndex() == self.ADD_PAGE:
             if self.add_game_has_changes():
                 dlg_discard = qtw.QMessageBox(self)
@@ -60,15 +62,18 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
                 if discard == qtw.QMessageBox.No:
                     return
 
+        # Prep the library list before going home
+        self.populate_library_list()
         self.pnl_pages.setCurrentIndex(self.LIBRARY_PAGE)
 
-    def go_add_game(self):
+    def navigate_to_add_game(self):
         self.add_game_art_changed = False
         self.txt_AddName.setText("")
         self.dd_AddYear.setCurrentIndex(0)
         self.dd_AddGenre.setCurrentIndex(0)
         self.txt_AddDescription.setPlainText("")
         self.lbl_AddGameArt.setPixmap(qtg.QPixmap("./ui/placeholder.png"))
+        
         self.pnl_pages.setCurrentIndex(self.ADD_PAGE)
 
     def add_game_has_changes(self):
@@ -126,7 +131,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
             dlg_required.setIcon(qtw.QMessageBox.Information)
             required = dlg_required.exec()
 
-    def view_game_go(self, id: int):
+    def navigate_to_view_game(self, id: int):
         query = "SELECT name, year, genre, description, art FROM games WHERE id = ?"
         game = cursor.execute(query, (id,)).fetchone()
         self.lbl_ViewTitle.setText(game[0])
@@ -134,11 +139,6 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         game_art = qtg.QPixmap("./ui/placeholder.png") if game[4] == "" else qtg.QPixmap(f"./ui/images/{game[4]}")
         self.lbl_ViewGameArt.setPixmap(game_art)
         self.pnl_pages.setCurrentIndex(self.VIEW_PAGE)        
-
-    def page_changed(self, index):
-        match index:
-            case self.LIBRARY_PAGE:
-                self.populate_library_list()
 
     def populate_library_list(self):
         while self.grid_games.count():
@@ -159,12 +159,11 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         for game in games:
             game_listing = GameListing(game)
             self.grid_games.addWidget(game_listing, row, col)
-            game_listing.clicked.connect(self.view_game_go)
+            game_listing.clicked.connect(self.navigate_to_view_game)
             col += 1
             if col >= 4:
                 col = 0
                 row += 1
-
 
 class GameListing(qtw.QWidget):
     clicked = qtc.Signal(int)
