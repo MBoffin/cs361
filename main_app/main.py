@@ -38,14 +38,22 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
 
     # TODO: Replace with Naveed's microservice
     def populate_tips(self):
-        query = "SELECT text FROM tips"
-        db_tips = cursor.execute(query).fetchall()
-        tips = []
-        tips.append(db_tips.pop(random.randint(0, len(db_tips)-1)))
-        tips.append(db_tips.pop(random.randint(0, len(db_tips)-1)))
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://localhost:5556")
+        socket.send_string("2")
+        response = socket.recv_string()
+        tips = response.splitlines()
+
+        #query = "SELECT text FROM tips"
+        #db_tips = cursor.execute(query).fetchall()
+        #tips = []
+        #tips.append(db_tips.pop(random.randint(0, len(db_tips)-1)))
+        #tips.append(db_tips.pop(random.randint(0, len(db_tips)-1)))
+
         tip_text = ""
         for tip in tips:
-            tip_text += f"• {tip[0]}\n\n"
+            tip_text += f"• {tip}\n\n"
         self.lbl_tips.setText(tip_text)
 
     def go_home(self):
@@ -82,8 +90,9 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
     def add_game_choose_art(self):
         self.file_chosen = qtw.QFileDialog.getOpenFileName(self, "Open Image", "./ui/images", "Images (*.png *.jpg)")[0]
         if self.file_chosen != "":
-            self.file_chosen = os.path.basename(self.file_chosen[0])
-            self.lbl_AddGameArt.setPixmap(qtg.QPixmap(self.file_chosen[0]))
+            self.file_chosen = os.path.basename(self.file_chosen)
+            print(self.file_chosen)
+            self.lbl_AddGameArt.setPixmap(qtg.QPixmap(f"./ui/images/{self.file_chosen}"))
             self.add_game_art_changed = True
 
     def art_drag_enter_event(self, event: qtg.QDragEnterEvent):
@@ -117,6 +126,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
             query = "INSERT INTO games (name, year, genre, description, art) VALUES (?, ?, ?, ?, ?)"
             cursor.execute(query, values)
             connection.commit()
+            self.populate_library_list()
             self.pnl_pages.setCurrentIndex(self.LIBRARY_PAGE)
             dlg_success = qtw.QMessageBox(self)
             dlg_success.setWindowTitle("Success!")
