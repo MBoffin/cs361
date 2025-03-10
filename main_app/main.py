@@ -35,6 +35,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.lbl_AddGameArt.dropEvent = self.art_drop_event
         self.add_game_art_changed = False
         
+        # Open connections to Microservices B, C, and D
         self.ms_b_context = zmq.Context()
         self.ms_b_socket = self.ms_b_context.socket(zmq.REQ)
         self.ms_b_socket.connect("tcp://localhost:5557")
@@ -50,6 +51,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.show()
 
     def closeEvent(self, event):
+        # Close connections to Microservices B, C, and D
         self.ms_b_socket.close()
         self.ms_b_context.term()
         self.ms_c_socket.close()
@@ -58,8 +60,10 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.ms_d_context.term()
         return super().closeEvent(event)
 
-    # TODO: Replace with Naveed's microservice
     def populate_tips(self):
+        ######################################
+        # Get tips from Microservice A
+        ######################################
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:5556")
@@ -110,17 +114,26 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         
         self.pnl_pages.setCurrentIndex(self.ADD_PAGE)
 
+    ######################################
+    # Get game names from Microservice B
+    ######################################
     def update_name_suggestions(self):
         self.ms_b_socket.send_string(self.txt_AddName.text())
         suggestions = self.ms_b_socket.recv_string().splitlines()
         self.model.setStringList(suggestions)
 
     def on_name_chosen(self, text):
+        ######################################
+        # Get description from Microservice C
+        ######################################
         self.ms_c_socket.send_string(text)
         description = self.ms_c_socket.recv_string()
         if description:
             self.txt_AddDescription.setPlainText(description)
 
+        ######################################
+        # Get game art from Microservice D
+        ######################################
         self.ms_d_socket.send_string(text)
         game_art = self.ms_d_socket.recv_string()
         if game_art:
