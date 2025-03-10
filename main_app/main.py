@@ -1,4 +1,4 @@
-import zmq, sys, random, sqlite3, os
+import zmq, sqlite3, os
 from PySide6 import QtWidgets as qtw
 from PySide6 import QtCore as qtc
 from PySide6 import QtGui as qtg
@@ -27,6 +27,7 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.dd_LibrarySortBy.currentIndexChanged.connect(self.populate_library_list)
 
         # Add Game page setup
+        self.txt_AddName.textChanged.connect(self.update_name_suggestions)
         self.btn_LibraryAddGame.clicked.connect(self.navigate_to_add_game)
         self.btn_AddGameSubmit.clicked.connect(self.add_new_game)
         self.btn_AddChooseArt.clicked.connect(self.add_game_choose_art)
@@ -34,7 +35,28 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.lbl_AddGameArt.dropEvent = self.art_drop_event
         self.add_game_art_changed = False
         
+        self.ms_b_context = zmq.Context()
+        self.ms_b_socket = self.ms_b_context.socket(zmq.REQ)
+        self.ms_b_socket.connect("tcp://localhost:5557")
+
+        self.ms_c_context = zmq.Context()
+        self.ms_c_socket = self.ms_c_context.socket(zmq.REQ)
+        self.ms_c_socket.connect("tcp://localhost:5558")
+
+        self.ms_d_context = zmq.Context()
+        self.ms_d_socket = self.ms_d_context.socket(zmq.REQ)
+        self.ms_d_socket.connect("tcp://localhost:5559")
+
         self.show()
+
+    def closeEvent(self, event):
+        self.ms_b_socket.close()
+        self.ms_b_context.term()
+        self.ms_c_socket.close()
+        self.ms_c_context.term()
+        self.ms_d_socket.close()
+        self.ms_d_context.term()
+        return super().closeEvent(event)
 
     # TODO: Replace with Naveed's microservice
     def populate_tips(self):
@@ -44,12 +66,8 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         socket.send_string("2")
         response = socket.recv_string()
         tips = response.splitlines()
-
-        #query = "SELECT text FROM tips"
-        #db_tips = cursor.execute(query).fetchall()
-        #tips = []
-        #tips.append(db_tips.pop(random.randint(0, len(db_tips)-1)))
-        #tips.append(db_tips.pop(random.randint(0, len(db_tips)-1)))
+        socket.close()
+        context.term()
 
         tip_text = ""
         for tip in tips:
@@ -81,8 +99,34 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
         self.dd_AddGenre.setCurrentIndex(0)
         self.txt_AddDescription.setPlainText("")
         self.lbl_AddGameArt.setPixmap(qtg.QPixmap("./ui/placeholder.png"))
+
+        self.completer = qtw.QCompleter(self)
+        self.completer.setCaseSensitivity(qtc.Qt.CaseSensitivity.CaseInsensitive)
+        self.completer.setFilterMode(qtc.Qt.MatchFlag.MatchContains)
+        self.model = qtc.QStringListModel()
+        self.completer.setModel(self.model)
+        self.txt_AddName.setCompleter(self.completer)
+        self.completer.activated.connect(self.on_name_chosen)
         
         self.pnl_pages.setCurrentIndex(self.ADD_PAGE)
+
+    def update_name_suggestions(self):
+        self.ms_b_socket.send_string(self.txt_AddName.text())
+        suggestions = self.ms_b_socket.recv_string().splitlines()
+        self.model.setStringList(suggestions)
+
+    def on_name_chosen(self, text):
+        self.ms_c_socket.send_string(text)
+        description = self.ms_c_socket.recv_string()
+        if description:
+            self.txt_AddDescription.setPlainText(description)
+
+        self.ms_d_socket.send_string(text)
+        game_art = self.ms_d_socket.recv_string()
+        if game_art:
+            self.lbl_AddGameArt.setPixmap(qtg.QPixmap(f"./ui/images/{game_art}"))
+            self.add_game_art_changed = True
+            self.file_chosen = game_art
 
     def add_game_has_changes(self):
         return self.txt_AddName.text() != "" or self.dd_AddYear.currentIndex() != 0 or self.dd_AddGenre.currentIndex() != 0 or self.txt_AddDescription.toPlainText() != "" or self.add_game_art_changed
@@ -133,6 +177,8 @@ class MainWindow(qtw.QMainWindow, Ui_w_MainWindow):
             dlg_success.setText(f"Success! {self.txt_AddName.text()} was added to your library!")
             dlg_success.setIcon(qtw.QMessageBox.Information)
             dlg_success.exec()
+            self.ms_b_socket.send_string(f"ADD: {self.txt_AddName.text()}")
+            response = self.ms_b_socket.recv_string()
         else:
             dlg_required = qtw.QMessageBox(self)
             dlg_required.setWindowTitle("Oops!")
