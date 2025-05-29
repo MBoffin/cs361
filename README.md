@@ -1,1 +1,3 @@
-This is my repository for CS361. And this is the readme file.
+Project repository for CS 361.
+
+This is a small game catalog app built in Python with PySide6 using a SQLite database backend.
